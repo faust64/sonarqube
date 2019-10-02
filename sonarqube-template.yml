@@ -426,3 +426,4 @@ parameters:
 - name: PROXY_PASSWORD
   description: Password credential when the Proxy Server requires authentication
   displayName: Proxy server password
+- name: PROXY_EXCLUDE
