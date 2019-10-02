@@ -68,7 +68,7 @@ objects:
       wrapper.jvm_exit.timeout=300
   kind: ConfigMap
   metadata:
-    name: sonarqube-${FRONTNAME}
+    name: sonarqube
 - apiVersion: v1
   kind: ImageStream
   metadata:
@@ -263,11 +263,17 @@ objects:
               cpu: ${SONARQUBE_CPU_REQUEST}
               memory: ${SONARQUBE_MEMORY_REQUEST}
           volumeMounts:
+          - mountPath: /opt/sonarqube/conf
+            name: config
           - mountPath: /opt/sonarqube/data
             name: data
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         volumes:
+        - configMap:
+            defaultMode: 420
+            name: sonarqube
+          name: config
         - name: data
           persistentVolumeClaim:
             claimName: sonarqube-data
