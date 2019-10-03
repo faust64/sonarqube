@@ -86,23 +86,21 @@ objects:
       name: latest
 - apiVersion: v1
   kind: Secret
-  stringData:
-    database-name: ${POSTGRES_DATABASE_NAME}
-    database-password: ${POSTGRES_PASSWORD}
-    database-user: ${POSTGRES_USERNAME}
   metadata:
     labels:
       app: sonarqube
     name: sonardb
-  type: Opaque
-- apiVersion: v1
   stringData:
-    password: ${SONAR_LDAP_BIND_PASSWORD}
-    username: ${SONAR_LDAP_BIND_DN}
+    database-name: ${POSTGRES_DATABASE_NAME}
+    database-password: ${POSTGRES_PASSWORD}
+    database-user: ${POSTGRES_USERNAME}
+- apiVersion: v1
   kind: Secret
   metadata:
     name: sonar-ldap-bind-dn
-  type: kubernetes.io/basic-auth
+  stringData:
+    password: ${SONAR_LDAP_BIND_PASSWORD}
+    username: ${SONAR_LDAP_BIND_DN}
 - apiVersion: v1
   kind: DeploymentConfig
   metadata:
@@ -168,9 +166,12 @@ objects:
             successThreshold: 1
             timeoutSeconds: 1
           resources:
+            limits:
+              cpu: ${POSTGRES_CONTAINER_CPU_LIMIT}
+              memory: ${POSTGRES_CONTAINER_MEMORY_LIMIT}
             requests:
-              memory: ${POSTGRES_CONTAINER_MEMORY_REQUEST}
               cpu: ${POSTGRES_CONTAINER_CPU_REQUEST}
+              memory: ${POSTGRES_CONTAINER_MEMORY_REQUEST}
           securityContext:
             capabilities: {}
             privileged: false
@@ -249,6 +250,9 @@ objects:
             successThreshold: 1
             timeoutSeconds: 1
           resources:
+            limits:
+              cpu: ${SONARQUBE_CPU_LIMIT}
+              memory: ${SONARQUBE_MEMORY_LIMIT}
             requests:
               cpu: ${SONARQUBE_CPU_REQUEST}
               memory: ${SONARQUBE_MEMORY_REQUEST}
@@ -393,22 +397,38 @@ parameters:
   name: POSTGRES_DATABASE_NAME
   value: sonar
   required: true
-- description: Postgres Container Memory request
-  displayName: Postgres Container Memory request
+- description: Postgres Container Memory size limit
+  displayName: Postgres Container Memory size limit
+  name: POSTGRES_CONTAINER_MEMORY_LIMIT
+  value: 768Mi
+- description: Postgres Container Memory size request
+  displayName: Postgres Container Memory size request
   name: POSTGRES_CONTAINER_MEMORY_REQUEST
   value: 128Mi
+- description: Postgres Container CPU limit
+  displayName: Postgres Container CPU limit
+  name: POSTGRES_CONTAINER_CPU_LIMIT
+  value: 200m
 - description: Postgres Container CPU request
   displayName: Postgres Container CPU request
   name: POSTGRES_CONTAINER_CPU_REQUEST
   value: 50m
-- name: SONARQUBE_MEMORY_REQUEST
-  description: SonarQube memory request
-  displayName: SonarQube memory request
-  value: 2Gi
+- name: SONARQUBE_CPU_LIMIT
+  description: SonarQube Container CPU limit
+  displayName: SonarQube Container CPU limit
+  value: 500m
 - name: SONARQUBE_CPU_REQUEST
   description: SonarQube Container CPU request
   displayName: SonarQube Container CPU request
   value: 100m
+- name: SONARQUBE_MEMORY_LIMIT
+  description: SonarQube memory limit
+  displayName: SonarQube memory limit
+  value: 4Gi
+- name: SONARQUBE_MEMORY_REQUEST
+  description: SonarQube memory request
+  displayName: SonarQube memory request
+  value: 2Gi
 - name: FORCE_AUTHENTICATION
   displayName: Force authentication
   value: "false"
